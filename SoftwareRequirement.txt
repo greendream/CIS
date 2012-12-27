@@ -1,0 +1,27 @@
+SOFTWARE_REQUIREMENT
+
+Tính năng chung của cả 2 chế độ Online & Offline:
+- Thông báo tình trạng đăng nhập
+- Xuất avarta của tài khoản
+- Mỗi người sử dụng đều cần có một tài khoản(Cần tạo để đăng nhập)
+- Chụp hình.
+- Ghi âm.
+- Lấy comment.
+- Lưu xuống máy.
+- Xem danh sách ảnh gần nhất mà bạn bè share.
+
+Tính năng Đặc trưng cho từng chế độ:
+- Online:
+   + Online - Đăng nhập.
+   + Online - Đăng xuất.   
+   + Online - Nhận ảnh share từ bạn bè ngay khi một người bạn của họ up ảnh lên.
+   + Online - Xem danh sách ảnh bạn bè đã share.
+   + Online - Ghi lại vị trí bằng GPS.
+   + Online - Download/Upload (Ảnh + comment + Audio) from/to server.
+   + Online - Quản lý danh sách bạn bè.
+   + Online - Đăng comment tới hình ảnh của bạn bè share cho mình.
+   + Online - Xem lại comment những ảnh mình đã share(được đồng bộ hóa trên server) 
+   
+- Offline:
+   + Offline - Share ngay khi có kết nối internet.
+   + Offline - Tạo danh sách ảnh chuẩn bị up cho việc share.

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mobile Image Sharing</title>
+    <link rel="stylesheet" href="css/themes/default/jquery.mobile-1.2.0.css" />
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.mobile-1.2.0.js"></script>
+    <script src="js/cordova-2.1.0.js"></script>
+    <script type="text/javascript" charset="utf-8">
+    
+    var pictureSource;      // picture source
+    var destinationType;    // sets the format of returned value
+    var collapsibleSetHtml; // array of images item list
+    var lastIndex;          // index of last object in collapsibleSetHtml array
+    var currentIndex;       // index of current select collapsibleItem in collapsibleSet
+
+    
+    // Wait for Cordova to connect with the device
+    //
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    // Cordova is ready to be used!
+    //
+    function onDeviceReady() {
+
+        pictureSource=navigator.camera.PictureSourceType;
+        destinationType=navigator.camera.DestinationType;
+    }
+    
+    // Create Image item in list of image at PrepareToShare page
+    //
+    function createCollapsibleItem(imageURI) {
+        
+        // Delete all collapsible element item of collapsibleSet
+        //
+        $("#collapsibleSet").empty();
+
+        // update Indexs value
+        //
+        lastIndex = lastIndex + 1;
+        currentIndex = lastIndex;
+
+        // javascript variable Object save all id of all sub element
+        // in imageListItem of collapsibleImageList
+        //
+        var htmlImageItem = new Object();
+        htmlImageItem.collapsibleId = "collapsibleId_" + lastIndex;
+        htmlImageItem.collapsibleLableId = "collapsibleLableId_" + lastIndex;
+        htmlImageItem.tiTitleId = "tiTitleId_" + lastIndex;
+        htmlImageItem.imgId = "imgId_" + lastIndex;
+        htmlImageItem.imgSrc = imageURI;
+        htmlImageItem.taCommentId = "taCommentId_" + lastIndex;        
+        
+        // add new collapsible Object to array collapsibleSetHtml
+        //
+        collapsibleSetHtml.push(htmlImageItem);
+        
+        var newCollapsibleItemHtml;
+        var bCollapsed = "true";
+        
+        // on title of image change 
+        //
+        function onTitleImageChange(index) {
+        	//alert("onTitleImageChange");
+        	var tiTitle = document.getElementById("tiTitleId_" + index);
+        	document.getElementById("collapsibleLableId_" + index).innerHTML = tiTitle.value;
+        }
+        
+        //
+        //
+        function onDeleteClick(index) {
+        	alert("Do you want to delete !");
+        }
+        
+        $("collapsibleLableId_" + currentIndex).html(this.value)
+        // Re-render all collapsible in colapsibleSet
+        //
+        for ( i = 0; i < collapsibleSetHtml.length; i++) {
+        	
+        	currentIndex = i;
+        	
+            // the last collapsible will expand and other collapsed
+            //
+            if (i == collapsibleSetHtml.length -1) {
+                bCollpased = "false";
+            }
+
+            // create new frame for Collapsible item html and full event handle
+            //
+            newCollapsibleItemHtml =
+                '<div data-role="collapsible" data-collapsed="' + bCollpased + '" id="'+ collapsibleSetHtml[i].collapsibleId + '"> \
+                    <h3 id="' + collapsibleSetHtml[i].collapsibleLableId + '">New image</h3> \
+                    <form action=""> \
+                        <div data-role="fieldcontain"> \
+                            <fieldset data-role="controlgroup"> \
+                                <input id="' + collapsibleSetHtml[i].tiTitleId + '" placeholder="Title" onchange="onTitleImageChange('+i+')" value="" type="text"> </input> \
+                            </fieldset> \
+                        </div> \
+                        <div> \
+                            <img id="' + collapsibleSetHtml[i].imgId + '" src="'+collapsibleSetHtml[i].imgSrc+'" alt="Smiley face" align="middle" width="240" height="100"></img> \
+                        </div> \
+                        <div data-role="fieldcontain"> \
+                            <fieldset data-role="controlgroup"> \
+                                <textarea id="' + collapsibleSetHtml[i].taCommentId + '" placeholder="Comment" value="" type="text"></textarea> \
+                            </fieldset> \
+                        </div> \
+                        <div data-role="navbar" data-iconpos="top"> \
+                            <ul> \
+                                <li> \
+                                    <a data-transition="fade" data-theme="" data-icon=""> \
+                                        Save \
+                                    </a> \
+                                </li> \
+                                <li> \
+                                    <a data-transition="fade" data-theme="" data-icon=""> \
+                                        Tag Location \
+                                    </a> \
+                                </li> \
+                                <li> \
+                                    <a data-transition="fade" data-theme="" data-icon=""> \
+                                        Record sound \
+                                    </a> \
+                                </li> \
+                                <li> \
+                                    <a data-rel="external" onclick="onDeleteClick('+ i +');" data-transition="fade" data-theme="" data-icon="" onclick=""> \
+                                        Delete \
+                                    </a> \
+                                </li> \
+                            </ul> \
+                        </div> \
+                    </form> \
+                </div>';
+
+              // add new collpasible item in to collapsibleSet
+              //
+              document.getElementById("collapsibleSet").innerHTML += newCollapsibleItemHtml;
+              //$("tiTitleId_" + i).live( "change", onTitleImageChange(i) );   
+        }          
+
+        //alert(document.getElementById("collapsibleSet").innerHTML);
+        // refresh UI
+        //
+        $("#pagePrepareToShare").trigger('create');
+        
+    }    
+
+    // Called when a photo is successfully retrieved
+    //
+    function onPhotoDataSuccess(imageData) {
+      var imageURL = "data:image/jpeg;base64," + imageData;
+      createCollapsibleItem(imageURL);
+    }
+
+    // Called when a photo is successfully retrieved
+    //
+    function onPhotoURISuccess(imageURI) {
+        createCollapsibleItem(imageURI);
+    }
+    
+
+    // A button will call this function
+    //
+    function prepareToGetPhoto() {
+        // change to Prepare to Share page
+        //
+
+        collapsibleSetHtml = new Array();
+
+        // reset & prepare value for the fist capture Photo
+        //
+        lastIndex = -1;
+        currentIndex = -1;
+
+    }
+    
+    // A button will call this function
+    //
+    function capturePhoto() {
+    	
+        // Take picture using device camera and retrieve image as URI string
+        //
+        navigator.camera.getPicture(onPhotoDataSuccess, onFail, {  quality : 100, 
+              destinationType : Camera.DestinationType.DATA_URL, 
+              sourceType : Camera.PictureSourceType.CAMERA, 
+              allowEdit : true,
+              encodingType: Camera.EncodingType.JPEG,
+              targetWidth: 240,
+              targetHeight: 100,
+              popoverOptions: CameraPopoverOptions,
+              correctOrientation : true,
+              saveToPhotoAlbum: true });
+    }
+
+ // A button will call this function
+    //
+    function getPhoto(source) {
+      // Retrieve image file location from specified source
+      navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50, 
+        destinationType: destinationType.FILE_URI,
+        sourceType: source });
+    }
+
+    // Called if something bad happens.
+    // 
+    function onFail(message) {
+      alert('Failed because: ' + message);
+      if (collpasibleSetHtml.length == 0) {
+          $.mobile.changePage( "#pageHome", { transition: "slideup"} );
+      }
+      
+    }
+
+    </script>
+        
+</head>
+   <body>
+        <!-- pageStart -->
+        <div data-role="page" data-theme="f" id="pageStart">
+            <div data-role="header" data-theme="e"  data-position="fixed">
+                <div>
+                    <div class="logo_center"></div>
+                </div>
+            </div>
+            
+            <!-- main content -->
+            <div id="pageStartContent" data-role="content" class="ui-content">
+            
+            <img class="home_initial_header_img" src="./images/generic_background.png">   
+            <div class="home_tagline">Simple, quick & secure sharing your image from anywhere</div>
+                  
+            <div data-role="collapsible-set">
+                <div id="collapsibeLogin" data-role="collapsible" data-theme="d" data-collapsed="false" class="home_collapsible_hidden">
+                    <h3><span class="home_collapsible_logo home_collapsible_login">&nbsp;</span>Log In</h3>
+                    <form class="login_form" method="post" data-ajax="false">
+                        <div data-role="fieldcontain">
+                            <fieldset data-role="controlgroup">
+                                <label for="tiEmailLogin"></label>
+                                <input name="tiEmailLogin" id="tiUserName" placeholder="Email Address" value="" type="text" />
+                            </fieldset>
+                        </div>
+                        <div data-role="fieldcontain">
+                            <fieldset data-role="controlgroup">
+                                <label for="tiPasswordLogin"></label>
+                                <input name="tiPasswordLogin" id="tiPassword" placeholder="Password" value="" type="password" />
+                            </fieldset>
+                        </div>
+                        <div data-role="fieldcontain">
+                            <fieldset data-role="controlgroup">
+                                <input type="checkbox" id="cbRememberLogin" name="cbRememberLogin" />
+                                <label for="cbRememberLogin">Keep me logged in</label>
+                            </fieldset>
+                        </div>
+                        <p><a id="btnLogin" data-transition="flip" onclick="onclickLogin();" rel="external" data-direction="reverse" data-role="button" data-theme="e">Log in</a></p>
+                    </form>
+                </div>
+
+                <div id="collapsibeSignup" data-role="collapsible" data-theme="d" data-collapsed="true" class="home_collapsible_hidden">
+                    <h3><span class="home_collapsible_logo home_collapsible_sign_up">&nbsp;</span>Sign Up</h3>
+                    
+                    <form class="signup_form" method="post" data-ajax="false">
+                        <div data-role="fieldcontain">
+                            <fieldset data-role="controlgroup">
+                                <label for="tiEmailSignup"></label>
+                                <input name="tiEmailSignup" id="tiEmailSignup" placeholder="Email Address" value="" type="text" />
+                            </fieldset>
+                        </div>
+                        <div data-role="fieldcontain">
+                            <fieldset data-role="controlgroup">
+                                <label for="tiPasswordSignup"></label>
+                                <input name="tiPasswordSignup" id="tiPasswordSignup" placeholder="Password" value="" type="password" />
+                            </fieldset>
+                        </div>
+                        <div data-role="fieldcontain" >
+                            <fieldset data-role="controlgroup" >
+                                <input type="checkbox" id="cbShowPassword" name="cbShowPassword" onchange="oncbShowPasswordChange()"/>
+                                <label for="cbShowPassword">Show Password</label>
+                            </fieldset>
+                        </div>
+                        
+                        <div class="sign_up_links">
+                            <a href="html/License.html" data-rel="dialog" data-transition="flip"><h4>I agree this Terms of Service !</h4></a>
+                        </div>
+                        <p><a id="btnSignup" data-transition="flip" onclick="onclickSignup();" rel="external" data-direction="reverse" data-role="button" data-theme="e">Sign up</a></p>
+                    </form>
+                    
+                </div>
+            </div>    
+            </div> <!-- end of main content -->
+           
+            <div data-theme="e" data-role="footer"  data-position="fixed">
+                <div data-role="navbar" data-iconpos="left">
+                    <ul>
+                        <li>
+                            <a href="html/About.html" data-rel="dialog" data-transition="flip" data-theme="e" data-icon="info">
+                                About
+                            </a>
+                        </li>                        
+                        <li>
+                            <a href="html/About.html" data-rel="dialog" data-transition="flip" data-theme="e" data-icon="info">
+                                Help
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div> <!-- End pageStart -->
+        
+        <!-- Start of Home page -->
+        <div data-role="page" data-theme="f" id="pageHome">
+            <div data-role="header"  data-theme="e" data-position="fixed">
+                <div>
+                    <div class="logo_center"></div>
+                </div>
+            </div>
+            <div data-role="header"  data-position="inline" data-theme="b">
+                <a href="../index.html" data-icon="search" class="ui-btn-left">Avatar</a>
+                <h1>Greendream</h1>
+                <a href="#popupMenuOption" data-rel="popup" data-icon="gear" data-role="button" class="ui-btn-right" data-inline="true">Menu</a>
+                <div data-role="popup" data-theme="e" id="popupMenuOption">         
+                    <ul data-role="listview" data-inset="true" data-theme="e">
+                        <li data-icon="grid">
+                            <select name="toggleswitchMode" id="tsModeStatus" data-theme="b" data-role="slider" data-mini="true">
+                                <option value="off">
+                                    Off Line
+                                </option>
+                                <option value="on">
+                                    On Line
+                                </option>
+                            </select>
+                        </li>
+                        <li data-icon="delete"><a href="#pageStart">Sign out</a></li>
+                        <li data-icon="gear"><a href="#pageSetting">Setting</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div data-role="content">            
+                <div data-role="collapsible-set" data-theme="e" data-content-theme="d">
+                    <ul data-role="listview" data-divider-theme="b" data-inset="true">
+                        <li data-role="list-divider" role="heading">Your Friend have Shared<span class="ui-li-count">12</span></li>
+                        <li data-theme="c">
+                            <a href="#" data-transition="slide">Button</a>
+                        </li>
+                        <li data-role="list-divider" role="heading">You have Shared<span class="ui-li-count">12</span></li>
+                        <li data-theme="c">
+                            <a href="#page1" data-transition="slide">Button</a>
+                        </li>
+                    </ul>                    
+                </div>
+            </div>
+       
+            <div id="pFooter" data-theme="e" data-role="footer" data-position="fixed">
+                <div id="navFooterHome" data-role="navbar" data-iconpos="top">
+                    <ul>
+                        <li>
+                            <a href="#pagePrepareToShare" onclick="prepareToGetPhoto();" rel="external" data-transition="none" data-theme="e" data-icon="search">
+                                Get Photo
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#pageFriends" data-transition="flip" data-theme="e" data-icon="arrow-d">
+                                Friends
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- End of Home -->
+        
+        <!-- Start of Setting Page -->
+        <div data-role="page" data-theme="f" id="pageSetting">         
+            <div data-role="header"  data-theme="e">
+                <div>
+                    <div class="logo_center"></div>
+                </div>
+            </div>
+            <div data-role="header"  data-position="inline" data-theme="b">
+                <h1>Setting</h1>
+            </div>
+            
+            <div data-role="content">            
+            
+            </div>
+            
+            <div id="pFooterSetting" data-theme="e" data-role="footer" data-position="fixed">
+                <div id="navFooterSetting" data-role="navbar" data-iconpos="top">
+                    <ul>
+                        <li>
+                            <a href="#pageHome" data-theme="e" data-icon="check">
+                                Save
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#pageHome" data-theme="e" data-icon="delete">
+                                Cancel
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>       
+        </div>
+        <!-- End of Setting page -->                
+                
+        <!-- Start of Prepare to Share Page -->
+        <div data-role="page" data-theme="f" id="pagePrepareToShare">         
+            <div data-role="header"  data-theme="e" data-position="fixed">
+                <div>
+                    <div class="logo_center"></div>
+                </div>
+            </div>
+            <div data-role="header"  data-position="inline" data-theme="b">
+            </div>
+            
+            <div data-role="content">
+            
+                <div id="collapsibleSet" data-role="collapsible-set" data-theme="e" data-content-theme="e">
+                    <!-- New Collapsible add here -->          
+                </div>
+        
+                <div id="cbApplyForAlbum" data-role="fieldcontain">
+                    <fieldset data-role="controlgroup" data-type="vertical">
+                        <input id="checkbox2" name="" type="checkbox">
+                        <label for="checkbox2">
+                            Apply this comment for Album
+                        </label>
+                    </fieldset>
+                </div>
+                <div>
+                    <img id="imgTest" src=""></img>
+                </div>
+            </div>      
+                  
+            <div data-theme="e" data-role="footer" data-position="fixed">
+                <div id="navFooterSetting" data-role="navbar" data-iconpos="top">
+                    <ul>
+                        <li>
+                            <a href="#pageHome" data-trasition="flip" data-theme="e" data-icon="delete">
+                                Home
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);" rel="external" data-trasition="flip" data-theme="e" data-icon="star">
+                                Photo Album
+                            </a>
+                        <li>
+                            <a href="#pageHome" data-trasition="flip" data-theme="e" data-icon="star">
+                                Share
+                            </a>
+                        </li>
+                        <li>
+                            <a onclick="capturePhoto();" rel="external" data-trasition="flip" data-theme="e" data-icon="arrow-d">
+                                Take New Image
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>       
+        </div>
+        <!-- End of Prepare to Share page -->
+                
+        <!-- Start of Friends Page -->
+        <div data-role="page" data-theme="f" id="pageFriends">         
+            <div data-role="header"  data-theme="e">
+                <div>
+                    <div class="logo_center"></div>
+                </div>
+            </div>
+            <div data-role="header"  data-position="inline" data-theme="b">
+                <h1>Friend List</h1>
+            </div>
+            
+            <div data-role="content">            
+            
+            </div>
+            
+            <div id="pFooterSetting" data-theme="e" data-role="footer" data-position="fixed">
+                <div id="navFooterSetting" data-role="navbar" data-iconpos="top">
+                    <ul>
+                        <li>
+                            <a href="#pageHome" data-theme="e" data-icon="check">
+                                Home
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#pageHome" data-theme="e" data-icon="check">
+                                Add friend
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#pageHome" data-theme="e" data-icon="delete">
+                                Un friend
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>       
+        </div>
+        <!-- End of Friends page -->
+
+        <!-- App custom javascript -->
+        <script>
+            function  onclickLogin() {
+                // Test account exist or no
+                // Account exist
+                $.mobile.changePage( "#pageHome", { transition: "flip"} );
+            }
+            
+            function  onclickSignup() {
+                $("#collapsibeLogin").data("collapsed",false);
+                $("#collapsibeSignup").data("collapsed",true);
+            }
+            
+            function oncbShowPasswordChange() {
+                if (document.getElementById("tiPasswordSignup").type == "text") {
+                    document.getElementById("tiPasswordSignup").type = "password";
+                }
+                else{
+                    document.getElementById("tiPasswordSignup").type = "text";
+                }                   
+            }
+        </script>
+    </body>
+</html>
